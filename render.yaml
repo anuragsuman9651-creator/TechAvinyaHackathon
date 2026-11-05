@@ -1,0 +1,17 @@
+databases:
+  - name: campusloop-db
+    plan: free
+services:
+  - type: web
+    name: campusloop
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: campusloop-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true

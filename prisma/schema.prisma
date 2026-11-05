@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TxType {
+  SELL
+  RENT
+  DONATE
+}
+
+enum TxStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum ProdStatus {
+  AVAILABLE
+  SOLD
+}
+
+model User {
+  id              String        @id @default(uuid())
+  name            String
+  email           String        @unique
+  passwordHash    String
+  department      String?
+  academicYear    String?
+  photoUrl        String?
+  createdAt       DateTime      @default(now())
+  products        Product[]
+  purchases       Transaction[] @relation("Buyer")
+  sales           Transaction[] @relation("Seller")
+  ratingsGiven    Rating[]      @relation("RatingsGiven")
+  ratingsReceived Rating[]      @relation("RatingsReceived")
+}
+
+model Product {
+  id           String        @id @default(uuid())
+  title        String
+  description  String
+  price        Int
+  imageUrl     String?
+  status       ProdStatus    @default(AVAILABLE)
+  sellerId     String
+  seller       User          @relation(fields: [sellerId], references: [id])
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+  ratings      Rating[]
+
+  @@index([sellerId])
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  type      TxType   @default(SELL)
+  status    TxStatus @default(PENDING)
+  productId String
+  buyerId   String
+  sellerId  String
+  product   Product  @relation(fields: [productId], references: [id])
+  buyer     User     @relation("Buyer", fields: [buyerId], references: [id])
+  seller    User     @relation("Seller", fields: [sellerId], references: [id])
+  rating    Rating?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([buyerId, status])
+  @@index([sellerId, status])
+}
+
+model Rating {
+  id                      String      @id @default(uuid())
+  buyerId                 String
+  sellerId                String
+  transactionId           String      @unique
+  productId               String
+  overallRating           Int
+  productAccuracyRating   Int
+  productConditionRating  Int
+  communicationRating     Int
+  overallExperienceRating Int
+  reviewText              String?     @db.VarChar(1000)
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  buyer                   User        @relation("RatingsGiven", fields: [buyerId], references: [id])
+  seller                  User        @relation("RatingsReceived", fields: [sellerId], references: [id])
+  transaction             Transaction @relation(fields: [transactionId], references: [id])
+  product                 Product     @relation(fields: [productId], references: [id])
+
+  @@index([sellerId, createdAt])
+  @@index([sellerId, overallRating])
+  @@index([buyerId])
+}

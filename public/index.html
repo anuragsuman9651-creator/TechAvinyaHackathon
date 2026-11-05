@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CampusLoop</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B2545;--navy2:#13315C;--sky:#E8EEF7;--line:#D5DEEC;--bg:#F6F8FC;--gold:#E8A317;--ok:#1B7F4B;--bad:#B3261E;--muted:#5B6B82}
+*{box-sizing:border-box}
+body{margin:0;font-family:Figtree,system-ui,sans-serif;background:var(--bg);color:var(--navy);line-height:1.5}
+a{color:var(--navy2)}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px}
+header{background:var(--navy);color:#fff}
+header .bar{display:flex;justify-content:space-between;align-items:center;padding:14px 16px}
+header a{color:#fff;text-decoration:none;margin-left:18px}
+.brand{font-weight:800;font-size:1.4rem;margin:0!important}
+.muted{color:var(--muted);font-size:.9rem}
+.star{color:var(--gold);font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.pcard{padding:0;overflow:hidden;margin:0}
+.pcard img{width:100%;height:160px;object-fit:cover;display:block}
+.pcard .in{padding:12px 14px}
+.pcard h3{margin:0 0 4px;font-size:1.05rem}
+.pcard a{text-decoration:none;color:inherit}
+.btn{background:var(--navy);color:#fff;border:0;border-radius:8px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--navy2)}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;margin-left:6px;font-size:.85rem}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input,textarea,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;margin:4px 0 12px}
+.note{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--navy);color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:12px}
+.note .muted{color:#BCCAE0}
+.note .btn{background:#fff;color:var(--navy)}
+.price{font-weight:800}
+.search{display:flex;gap:8px;margin-bottom:16px}.search input{margin:0}.search .btn{white-space:nowrap}
+.seller{display:flex;gap:14px;align-items:center}
+.seller img,.avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--sky)}
+.detail{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+.detail>img{width:100%;border-radius:10px;max-height:380px;object-fit:cover}
+@media(max-width:760px){.detail{grid-template-columns:1fr}}
+.rep{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:center}
+@media(max-width:640px){.rep{grid-template-columns:1fr}}
+.big{font-size:3.2rem;font-weight:800;line-height:1}.big small{font-size:1.1rem;color:var(--gold);margin-left:4px}
+.dr{display:grid;grid-template-columns:70px 1fr 80px;gap:10px;align-items:center;font-size:.85rem;margin:4px 0}
+.trk{background:var(--sky);height:10px;border-radius:6px;overflow:hidden}.trk i{display:block;height:100%;background:var(--navy2)}
+.rv{border-bottom:1px solid var(--line);padding:12px 0}.rv:last-child{border:0}
+.chips span{display:inline-block;background:var(--sky);border-radius:6px;padding:2px 8px;font-size:.78rem;margin:4px 6px 0 0}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:24px;text-align:center;color:var(--muted);background:#fff}
+.row2{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.tag{background:var(--sky);border-radius:6px;padding:2px 10px;font-size:.8rem;font-weight:600}
+.ov{position:fixed;inset:0;background:rgba(11,37,69,.6);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:20px;z-index:20}
+.dlg{background:#fff;border-radius:12px;padding:22px;max-width:560px;width:100%}
+.dlg h2{margin-top:0}
+.fld{display:block;margin-bottom:16px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pills button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;cursor:pointer;color:var(--navy);transition:background .15s,color .15s}
+.pills button:hover{background:var(--sky)}
+.pills button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.scale{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-top:4px}
+.row{display:flex;gap:10px;justify-content:flex-end}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:30}
+#toast div{background:var(--ok);color:#fff;padding:12px 20px;border-radius:8px;margin-top:8px;font-weight:600}
+#toast div.err{background:var(--bad)}
+h2,h3{margin:20px 0 10px}
+</style>
+</head>
+<body>
+<header id="nav"></header>
+<main id="app"></main>
+<div id="modal"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = d => new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+const FALLBACK = 'https://picsum.photos/seed/campusloop/600/400';
+let token = localStorage.getItem('t'), me = null, Q = '', reg = false, elig = [], draft = {};
+
+async function api(p, o = {}) {
+  const r = await fetch('/api' + p, {...o, headers: {'Content-Type':'application/json', ...(token ? {Authorization:'Bearer ' + token} : {})}, body: o.body ? JSON.stringify(o.body) : undefined});
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'Something went wrong');
+  return d;
+}
+function toast(msg, err) {
+  const el = document.createElement('div'); if (err) el.className = 'err'; el.textContent = msg;
+  $('#toast').appendChild(el); setTimeout(() => el.remove(), 3500);
+}
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const ratingLine = s => s && s.total
+  ? `<span class="star">★ ${s.average}/10</span> <span class="muted">(${plural(s.total, 'rating')})</span>`
+  : `<span class="muted">New Seller – Not Yet Rated.</span>`;
+
+function nav() {
+  $('#nav').innerHTML = `<div class="bar"><a class="brand" href="#/">CampusLoop</a><nav><a href="#/">Marketplace</a>${me ? `<a href="#/dashboard">Dashboard</a><a href="#" id="lo">Log out</a>` : `<a href="#/login">Log in</a>`}</nav></div>`;
+  const lo = $('#lo');
+  if (lo) lo.onclick = e => { e.preventDefault(); token = null; me = null; localStorage.removeItem('t'); location.hash = '#/'; go(); };
+}
+
+/* ----- Reputation components ----- */
+function reviewCard(r) {
+  return `<div class="rv"><div><b>${esc(r.buyerName)}</b> <span class="star">★ ${r.overallRating}/10</span> <span class="muted">${fmtDate(r.createdAt)}</span></div>
+  <div class="muted">Purchased: ${esc(r.productTitle)}</div>${r.reviewText ? `<p>${esc(r.reviewText)}</p>` : ''}
+  <div class="chips"><span>Accuracy ${r.productAccuracyRating}</span><span>Condition ${r.productConditionRating}</span><span>Communication ${r.communicationRating}</span><span>Experience ${r.overallExperienceRating}</span></div></div>`;
+}
+function rep(s, rv, own) {
+  const max = Math.max(1, ...Object.values(s.distribution));
+  const bars = [10,9,8,7,6,5,4,3,2,1].map(n => `<div class="dr"><span>${n} points</span><div class="trk"><i style="width:${s.distribution[n] / max * 100}%"></i></div><span>${plural(s.distribution[n], 'rating')}</span></div>`).join('');
+  return `<section class="card rep"><div><div class="big">${s.total ? s.average : '–'}<small>/10 ★</small></div><div class="muted">Based on ${plural(s.total, 'student review')}</div></div><div>${bars}</div></section>
+  <h3>${own ? 'Recent reviews' : 'Reviews'}</h3>
+  ${rv.length ? `<div class="card">${rv.map(reviewCard).join('')}</div>` : `<div class="empty">No ratings yet. Reviews appear here after a buyer completes a purchase and rates the seller.</div>`}`;
+}
+
+/* ----- Rating prompt + form ----- */
+async function banner() {
+  if (!me) return '';
+  try { elig = await api('/ratings/eligible-transactions'); } catch { elig = []; }
+  return elig.map((t, i) => `<div class="note"><div><b>How was your experience with this seller?</b><div class="muted">${esc(t.product.title)} from ${esc(t.seller.name)}</div></div><button class="btn" data-rate="${i}">Rate Seller</button></div>`).join('');
+}
+const CRIT = [
+  ['overallRating', 'Overall rating', 'How was your experience with this seller overall?'],
+  ['productAccuracyRating', 'Product accuracy', 'Did the actual product match the description and specifications?'],
+  ['productConditionRating', 'Product condition', 'Was the actual condition consistent with what was advertised?'],
+  ['communicationRating', 'Seller communication', 'Was the seller responsive and helpful?'],
+  ['overallExperienceRating', 'Overall experience', 'How satisfactory was the complete transaction?'],
+];
+function openRate(t) {
+  draft = {transactionId: t.id, sellerId: t.seller.id};
+  const pills = Array.from({length: 10}, (_, i) => `<button type="button" data-v="${i + 1}" aria-label="${i + 1} out of 10">${i + 1}</button>`).join('');
+  $('#modal').innerHTML = `<div class="ov"><form class="dlg" id="rf"><h2>Rate ${esc(t.seller.name)}</h2><p class="muted">${esc(t.product.title)}. Scores run from 1 (very poor) to 10 (excellent).</p>
+  ${CRIT.map(([k, l, q]) => `<div class="fld"><b>${l}</b><div class="muted">${q}</div><div class="pills" data-k="${k}">${pills}</div><div class="scale"><span>Very poor</span><span>Excellent</span></div></div>`).join('')}
+  <label class="fld"><b>Written review (optional)</b><textarea id="rt" maxlength="1000" rows="3" placeholder="Product was exactly as described. The seller was cooperative and handed over the product on time."></textarea></label>
+  <div class="row"><button type="button" class="btn ghost" id="rc">Cancel</button><button class="btn">Submit Rating</button></div></form></div>`;
+  $('#rc').onclick = () => $('#modal').innerHTML = '';
+  $('#rf').onclick = e => {
+    const b = e.target.closest('.pills button'); if (!b) return;
+    const g = b.parentElement; draft[g.dataset.k] = +b.dataset.v;
+    g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  };
+  $('#rf').onsubmit = async e => {
+    e.preventDefault();
+    if (CRIT.some(([k]) => !draft[k])) return toast('Pick a score from 1 to 10 for every question.', true);
+    try {
+      const body = {...draft}; const txt = $('#rt').value.trim(); if (txt) body.reviewText = txt;
+      await api('/ratings', {method: 'POST', body});
+      $('#modal').innerHTML = ''; toast('Thanks! Your rating was submitted.'); go();
+    } catch (err) { toast(err.message, true); }
+  };
+}
+
+/* ----- Pages ----- */
+async function market() {
+  const [b, items] = await Promise.all([banner(), api('/products?q=' + encodeURIComponent(Q))]);
+  return `${b}<form class="search" id="sf"><input id="q" value="${esc(Q)}" placeholder="Search calculators, books, lamps" aria-label="Search products"><button class="btn">Search</button></form>
+  ${items.length ? `<div class="grid">${items.map(p => `<article class="card pcard"><a href="#/product/${p.id}"><img src="${esc(p.imageUrl || FALLBACK)}" alt="${esc(p.title)}" loading="lazy"><div class="in"><h3>${esc(p.title)}</h3><div class="price">₹${p.price}</div><div class="muted">Seller: ${esc(p.seller.name)}</div><div>${ratingLine(p.sellerRating)}</div></div></a></article>`).join('')}</div>` : `<div class="empty">No products match your search. Try another word or list your own item from the dashboard.</div>`}`;
+}
+async function product(id) {
+  const p = await api('/products/' + id), s = p.seller;
+  const own = me && me.id === s.id;
+  return `<div class="detail"><img src="${esc(p.imageUrl || FALLBACK)}" alt="${esc(p.title)}"><div>
+  <h2 style="margin-top:0">${esc(p.title)}</h2><div class="price" style="font-size:1.5rem">₹${p.price}</div><p>${esc(p.description)}</p>
+  ${p.status === 'AVAILABLE' ? (own ? '<p class="muted">This is your listing.</p>' : `<button class="btn" data-buy="${p.id}">Request to buy</button>`) : '<span class="tag">Sold</span>'}
+  <div class="card seller" style="margin-top:18px"><img src="${esc(s.photoUrl || FALLBACK)}" alt="${esc(s.name)}"><div><b>${esc(s.name)}</b><div class="muted">${esc(s.department || 'Department not set')}, ${esc(s.academicYear || 'year not set')}</div><div>${ratingLine(s.rating)}</div><a href="#/seller/${s.id}">View Seller Profile</a></div></div></div></div>`;
+}
+async function seller(id) {
+  const [u, s, rv] = await Promise.all([api('/users/' + id), api(`/ratings/seller/${id}/summary`), api(`/ratings/seller/${id}`)]);
+  return `<div class="card seller"><img src="${esc(u.photoUrl || FALLBACK)}" alt="${esc(u.name)}"><div><h2 style="margin:0">${esc(u.name)}</h2><div class="muted">${esc(u.department || '')} ${esc(u.academicYear || '')}</div></div></div>${rep(s, rv, false)}`;
+}
+const acts = (t, isSeller) => {
+  const B = (a, l) => `<button class="btn sm" data-tx="${t.id}" data-do="${a}">${l}</button>`;
+  if (isSeller) { if (t.status === 'PENDING') return B('accept', 'Accept') + B('reject', 'Reject'); if (t.status === 'ACCEPTED') return B('complete', 'Mark completed'); }
+  else if (['PENDING', 'ACCEPTED'].includes(t.status)) return B('cancel', 'Cancel request');
+  return '';
+};
+const txRow = (t, isSeller) => `<div class="row2"><div><b>${esc(t.product.title)}</b><div class="muted">${isSeller ? 'Buyer: ' + esc(t.buyer.name) : 'Seller: ' + esc(t.seller.name)}</div></div><span class="tag">${t.status}</span><div>${acts(t, isSeller)}</div></div>`;
+async function dashboard() {
+  if (!me) { location.hash = '#/login'; return ''; }
+  const [b, tx, sum, rv, mine, given] = await Promise.all([banner(), api('/transactions/mine'), api('/ratings/seller/my-summary'), api('/ratings/seller/my-reviews'), api('/products/mine'), api('/ratings/my-reviews')]);
+  return `${b}<h2>My reputation as a seller</h2>${rep(sum, rv, true)}
+  <h2>List an item</h2><form class="card" id="pf"><input id="pt" placeholder="Title" required><textarea id="pd" rows="2" placeholder="Description and specifications" required></textarea><input id="pp" type="number" min="0" placeholder="Price in ₹" required><input id="pi" type="url" placeholder="Image URL (optional)"><button class="btn">Publish listing</button></form>
+  <h2>Requests I received</h2><div class="card">${tx.asSeller.length ? tx.asSeller.map(t => txRow(t, true)).join('') : '<div class="muted">No requests yet.</div>'}</div>
+  <h2>Requests I made</h2><div class="card">${tx.asBuyer.length ? tx.asBuyer.map(t => txRow(t, false)).join('') : '<div class="muted">You have not requested anything yet.</div>'}</div>
+  <h2>My listings</h2><div class="card">${mine.length ? mine.map(p => `<div class="row2"><a href="#/product/${p.id}">${esc(p.title)}</a><span>₹${p.price}</span><span class="tag">${p.status}</span></div>`).join('') : '<div class="muted">No listings yet.</div>'}</div>
+  <h2>Reviews I have given</h2><div class="card">${given.length ? given.map(r => `<div class="row2"><span>${esc(r.seller.name)}: ${esc(r.product.title)}</span><span class="star">★ ${r.overallRating}/10</span></div>`).join('') : '<div class="muted">Ratings you submit will appear here.</div>'}</div>`;
+}
+async function login() {
+  return `<div class="card" style="max-width:420px;margin:20px auto"><h2 style="margin-top:0">${reg ? 'Create account' : 'Log in'}</h2><form id="lf">
+  ${reg ? '<input id="ln" placeholder="Full name" required><input id="ld" placeholder="Department"><input id="ly" placeholder="Academic year (e.g. 2nd Year)">' : ''}
+  <input id="le" type="email" placeholder="Email" required><input id="lp" type="password" placeholder="Password (8+ characters)" required minlength="8"><button class="btn">${reg ? 'Create account' : 'Log in'}</button></form>
+  <p><a href="#" id="tg">${reg ? 'Already have an account? Log in' : 'New here? Create an account'}</a></p>${reg ? '' : '<p class="muted">Demo: anurag@campusloop.test / password123</p>'}</div>`;
+}
+
+const routes = {'': market, product, seller, dashboard, login};
+async function go() {
+  const [, a = '', id] = (location.hash.slice(1) || '/').split('/');
+  try {
+    if (token && !me) me = await api('/auth/me').catch(() => null);
+    nav();
+    const html = await (routes[a] || market)(id);
+    $('#app').innerHTML = `<div class="wrap">${html}</div>`;
+  } catch (e) { $('#app').innerHTML = `<div class="wrap"><div class="empty">${esc(e.message)}</div></div>`; }
+}
+
+/* ----- Delegated events ----- */
+document.addEventListener('click', async e => {
+  const t = e.target;
+  try {
+    const rate = t.closest('[data-rate]'); if (rate) return openRate(elig[rate.dataset.rate]);
+    const buy = t.closest('[data-buy]');
+    if (buy) { if (!me) { location.hash = '#/login'; return; } await api('/transactions', {method: 'POST', body: {productId: buy.dataset.buy}}); toast('Request sent to the seller.'); location.hash = '#/dashboard'; return; }
+    const d = t.closest('[data-do]');
+    if (d) { await api('/transactions/' + d.dataset.tx, {method: 'PATCH', body: {action: d.dataset.do}}); toast('Updated.'); go(); return; }
+    if (t.id === 'tg') { e.preventDefault(); reg = !reg; go(); }
+  } catch (err) { toast(err.message, true); }
+});
+document.addEventListener('submit', async e => {
+  const id = e.target.id; if (!['sf', 'lf', 'pf'].includes(id)) return;
+  e.preventDefault();
+  try {
+    if (id === 'sf') { Q = $('#q').value.trim(); go(); }
+    if (id === 'lf') {
+      const body = {email: $('#le').value, password: $('#lp').value};
+      if (reg) Object.assign(body, {name: $('#ln').value, department: $('#ld').value || undefined, academicYear: $('#ly').value || undefined});
+      const r = await api(reg ? '/auth/register' : '/auth/login', {method: 'POST', body});
+      token = r.token; localStorage.setItem('t', token); me = null; location.hash = '#/'; go();
+    }
+    if (id === 'pf') {
+      await api('/products', {method: 'POST', body: {title: $('#pt').value, description: $('#pd').value, price: parseInt($('#pp').value, 10), imageUrl: $('#pi').value}});
+      toast('Listing published.'); go();
+    }
+  } catch (err) { toast(err.message, true); }
+});
+window.addEventListener('hashchange', go);
+go();
+</script>
+</body>
+</html>
